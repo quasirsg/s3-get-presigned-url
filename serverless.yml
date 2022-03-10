@@ -1,0 +1,48 @@
+
+service: s3-presigned-url-demo
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: 20201221
+  stage: 'dev'
+  region: 'us-east-2'
+  profile: 'student-user'
+  
+  iamRoleStatements:
+    - Effect: Allow
+      Action: 
+        - S3:GetObject
+        - S3:PutObject
+      Resource: !Join ["/",[!GetAtt DemoBucket.Arn, "*"]]
+
+# bucket_arn/*
+   
+functions:
+  hello:
+    handler: handler.generatePresignedUrl
+    environment:
+      BUCKET_NAME: !Ref DemoBucket
+    events:
+      - http:
+          path: presigned
+          method: post
+
+# you can add CloudFormation resource templates here
+resources:
+ Resources:
+   DemoBucket:
+     Type: AWS::S3::Bucket
+     Properties:
+       BucketName: mct-presigned-demo-3342
+       PublicAccessBlockConfiguration:
+         BlockPublicAcls: true
+         BlockPublicPolicy: true
+         IgnorePublicAcls: true
+         RestrictPublicBuckets: true
+ Outputs:
+    NewOutput:
+      Description: "Description for the output"
+      Value: "Some output value"
